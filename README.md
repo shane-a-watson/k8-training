@@ -29,52 +29,52 @@ Deployments use ReplicaSets to manage and orchestrate updates to the application
 - replicaset
 
 ### kubectl run
-kubectl run <NAME> --image=<IMAGE> 
+kubectl run {NAME} --image={IMAGE} 
 
 ### kubectl create
-kubectl create -f <FILEPATH>
+kubectl create -f {FILEPATH}
 
 ### kubectl get
-kubectl get <RESOURCE>
-key all resources: kubectl get all
+`kubectl get {RESOURCE}`
+Get all resources: `kubectl get all`
 
-Note - get more info with "kubectl get <RESOURCE> -o wide"
+**Note** - get more info with `kubectl get {RESOURCE} -o wide`
 
 ## kubectl delete
-kubectl delete <RESOURCE> <ID>
+`kubectl delete {RESOURCE} {ID}`
 
 ## kubectl describe
-kubectl describe <RESOURCE>
+`kubectl describe {RESOURCE}`
 
 ## kubectl edit - This will open an editor and will make the changes as soon as the file is saved
-kubectl edit <RESOURCE> <RESOURCE-NAME>
+`kubectl edit {RESOURCE} {RESOURCE-NAME}`
 
-Example - kubectl edit replicaset myapp-replicatset  
+**Example** - `kubectl edit replicaset myapp-replicatset` 
 
 ## kubectl scale
-kubectl scale <RESOURCE> <RESOURCE-NAME> <ARGS>
+`kubectl scale {RESOURCE} {RESOURCE-NAME} {ARGS}`
 
-Example - kubectl scale replicaset myapp-replicatset --replicas=2
+**Example** - `kubectl scale replicaset myapp-replicatset --replicas=2`
 
 ## kubectl rollout
 View Rollout Status:
-kubectl rollout status deployment/<deployment-name>
+`kubectl rollout status deployment/{deployment-name}`
 
 Pause Rollout:
-kubectl rollout pause deployment/<deployment-name>
+`kubectl rollout pause deployment/{deployment-name}`
 
 Resume Rollout:
-kubectl rollout resume deployment/<deployment-name>
+`kubectl rollout resume deployment/{deployment-name}`
 
 History of Rollout:
-kubectl rollout history deployment/<deployment-name>
+`kubectl rollout history deployment/{deployment-name}`
 
 Undo Last Rollout:
-kubectl rollout undo deployment/<deployment-name>
+`kubectl rollout undo deployment/{deployment-name}`
 
 Rollback to Specific Revision:
-kubectl rollout undo deployment/<deployment-name> --to-revision=<revision-number>
+`kubectl rollout undo deployment/{deployment-name} --to-revision={revision-number}`
 
 ## kubectl set
 Change image: 
-kubectl set image deployment <deployment-name> <container-name>=nginx:1.18-perl --record
+`kubectl set image deployment {deployment-name} {container-name}=nginx:1.18-perl --record`

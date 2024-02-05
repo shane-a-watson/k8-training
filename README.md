@@ -29,10 +29,10 @@ Deployments use ReplicaSets to manage and orchestrate updates to the application
 - replicaset
 
 ### kubectl run
-kubectl run {NAME} --image={IMAGE} 
+`kubectl run {NAME} --image={IMAGE}`
 
 ### kubectl create
-kubectl create -f {FILEPATH}
+`kubectl create -f {FILEPATH}`
 
 ### kubectl get
 `kubectl get {RESOURCE}`

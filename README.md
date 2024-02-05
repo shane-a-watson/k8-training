@@ -11,11 +11,6 @@ Deployments are higher-level abstractions built on top of pods to manage their l
 They enable declarative updates, rollbacks, and scaling of applications by defining desired characteristics such as the number of replicas and container specifications.
 Deployments automatically handle the creation and scaling of underlying ReplicaSets.
 
-### ReplicationController
-ReplicationControllers are the predecessors of Deployments and are used to ensure a specified number of pod replicas are running at all times.
-They continuously monitor the state of pods and create or terminate replicas as needed to maintain the desired number.
-While still functional, Deployments have largely superseded ReplicationControllers due to their additional features and flexibility.
-
 ### ReplicaSet
 ReplicaSets are the building blocks of Deployments, responsible for ensuring a specified number of pod replicas are running.
 They allow for the scaling of pods horizontally by creating or removing replicas based on the defined criteria.
@@ -25,7 +20,6 @@ Deployments use ReplicaSets to manage and orchestrate updates to the application
 ### Resources:
 - pods
 - deployments
-- replicationcontroller
 - replicaset
 
 ### kubectl run

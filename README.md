@@ -86,3 +86,7 @@ Creates an external load balancer that routes traffic to the service. This is us
 
 ## ExternalName
 Maps the service to the contents of the externalName field (e.g., a DNS name).
+
+# MiniKube
+Return service detail: 
+`minikube service myapp-service`

@@ -3,18 +3,20 @@ kind: Deployment
 metadata:
   name: myapp-deployment
   labels:
-    tier: front-end
-    app: nginx
+    app: nginx-app
+    type: front-end
 spec:
   selector:
     matchLabels:
       app: nginx-app
+      type: front-end
   replicas: 6
   template: 
     metadata: 
       name: nginx
       labels:
         app: nginx-app
+        type: front-end
     spec: 
       containers:
         - name: nginx

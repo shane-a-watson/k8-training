@@ -1,6 +1,6 @@
 # K8 Notes
 
-## Resources
+## Objects
 ### Pods
 Pods are the smallest deployable units in Kubernetes.
 They represent a single instance of a running process in a cluster, encapsulating one or more containers.
@@ -17,7 +17,7 @@ They allow for the scaling of pods horizontally by creating or removing replicas
 Deployments use ReplicaSets to manage and orchestrate updates to the application by creating a new ReplicaSet and gradually migrating pods.
 
 ## Commands
-### Resources:
+### Objects:
 - pods
 - deployments
 - replicaset
@@ -29,24 +29,24 @@ Deployments use ReplicaSets to manage and orchestrate updates to the application
 `kubectl create -f {FILEPATH}`
 
 ### kubectl get
-`kubectl get {RESOURCE}`
-Get all resources: `kubectl get all`
+`kubectl get {OBJECT}`
+Get all objects: `kubectl get all`
 
-**Note** - get more info with `kubectl get {RESOURCE} -o wide`
+**Note** - get more info with `kubectl get {OBJECT} -o wide`
 
 ## kubectl delete
-`kubectl delete {RESOURCE} {ID}`
+`kubectl delete {OBJECT} {ID}`
 
 ## kubectl describe
-`kubectl describe {RESOURCE}`
+`kubectl describe {OBJECT}`
 
 ## kubectl edit - This will open an editor and will make the changes as soon as the file is saved
-`kubectl edit {RESOURCE} {RESOURCE-NAME}`
+`kubectl edit {OBJECT} {OBJECT-NAME}`
 
 **Example** - `kubectl edit replicaset myapp-replicatset` 
 
 ## kubectl scale
-`kubectl scale {RESOURCE} {RESOURCE-NAME} {ARGS}`
+`kubectl scale {OBJECT} {OBJECT-NAME} {ARGS}`
 
 **Example** - `kubectl scale replicaset myapp-replicatset --replicas=2`
 
@@ -72,3 +72,17 @@ Rollback to Specific Revision:
 ## kubectl set
 Change image: 
 `kubectl set image deployment {deployment-name} {container-name}=nginx:1.18-perl --record`
+
+# Service Types
+
+## ClusterIP
+This is the default service type. It exposes the service on a cluster-internal IP address, making it accessible only from within the cluster.
+
+## NodePort
+Exposes the service on each node's IP at a static port. It can be accessed from outside the cluster by using <NodeIP>:<NodePort>.
+
+## LoadBalancer
+Creates an external load balancer that routes traffic to the service. This is useful when the application needs to be accessed from outside the cluster, and the cloud provider supports it.
+
+## ExternalName
+Maps the service to the contents of the externalName field (e.g., a DNS name).

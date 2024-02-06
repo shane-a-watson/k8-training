@@ -8,13 +8,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: myapp
+      app: nginx-app
   replicas: 6
   template: 
     metadata: 
       name: nginx
       labels:
-        app: myapp
+        app: nginx-app
     spec: 
       containers:
         - name: nginx

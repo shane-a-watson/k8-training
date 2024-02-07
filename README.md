@@ -89,4 +89,4 @@ Maps the service to the contents of the externalName field (e.g., a DNS name).
 
 # MiniKube
 Return service detail: 
-`minikube service myapp-service`
+`minikube service {SERVICE}`

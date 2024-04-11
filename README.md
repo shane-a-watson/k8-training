@@ -16,6 +16,11 @@ ReplicaSets are the building blocks of Deployments, responsible for ensuring a s
 They allow for the scaling of pods horizontally by creating or removing replicas based on the defined criteria.
 Deployments use ReplicaSets to manage and orchestrate updates to the application by creating a new ReplicaSet and gradually migrating pods.
 
+### Namespaces
+Namespaces provide a way to logically divide cluster resources into virtual clusters, allowing multiple users, teams, or applications to share a physical Kubernetes cluster without interfering with each other. 
+Essentially, namespaces offer a scope for Kubernetes objects, such as pods, services, and replication controllers. They help in organizing and managing resources by providing isolation, resource quota, and access control within the cluster. 
+By default, Kubernetes resources are created in the 'default' namespace, but users can create additional namespaces to organize and isolate their workloads. This abstraction simplifies cluster management, enhances security, and supports multi-tenancy in Kubernetes environments.
+
 ## Commands
 ### Objects:
 - pods
@@ -25,7 +30,8 @@ Deployments use ReplicaSets to manage and orchestrate updates to the application
 ### kubectl run
 `kubectl run {NAME} --image={IMAGE}`
 
-**Note** - You can generate the YAML file for a pod by running `kubectl run {POD-NAME} --image={IMAGE-NAME} --dry-run=client -o yaml` Create the file directly by adding `> {FILE-NAME}`
+**Note**  
+You can generate the YAML file for a pod by running `kubectl run {POD-NAME} --image={IMAGE-NAME} --dry-run=client -o yaml` Create the file directly by adding `> {FILE-NAME}`
 
 ### kubectl create
 `kubectl create -f {FILEPATH}`
@@ -34,10 +40,13 @@ Deployments use ReplicaSets to manage and orchestrate updates to the application
 `kubectl get {OBJECT}`
 Get all objects: `kubectl get all`
 
-**Note** - get more info with `kubectl get {OBJECT} -o wide`
+**Note** - get more info: `kubectl get {OBJECT} -o wide`
+**Note** - get pods using labels: `kubectl get {OBJECT} --selector {KEY}={VALUE}` To use multiple selectors: `kubectl get pods --selector={KEY1}={VALUE1},{KEY2}={VALUE2}`
 
 ## kubectl delete
 `kubectl delete {OBJECT} {ID}`
+
+**Note** - If youve changed a config file you can delete the old object and replace it with: `kubectl replace --force -f {FILE}`
 
 ## kubectl describe
 `kubectl describe {OBJECT}`
@@ -74,6 +83,33 @@ Rollback to Specific Revision:
 ## kubectl set
 Change image: 
 `kubectl set image deployment {deployment-name} {container-name}=nginx:1.18-perl --record`
+
+## Namespace specific
+Set Default Namespace (for current context):
+`kubectl config set-context --current --namespace=<namespace-name>`
+
+Switch Default Namespace (globally):
+`kubectl config set-context --current --namespace=<namespace-name>`
+
+Resource Creation in Specific Namespace:
+`kubectl create -f <resource-file> --namespace=<namespace-name>`
+
+Get Resources in a Namespace:
+`kubectl get <resource-type> --namespace=<namespace-name>`
+
+Get all resources in all Namespaces:
+`kubectl get <object> --all-namespaces`
+
+## kubectl taint
+You can taint a Node to ensure that only Tolerent Pods can be placed on them. Unless a tolerance is added to the Pod it will never be able to run on the tainted Node
+`kubectl taint nodes {NODE_NAME} {KEY}={VALUE}:{TAINT_EFFECTS}`
+Options for the taint effect are:
+- NoSchedule: Pods will NOT be sceduled on the Node
+- PreferNoSchedule: Will try to avoid placing a Pod, but no guarantees 
+- NoExecute: New Pods will not be scheduled and existing Pods will be evicted (if they dont have the tolerance)
+
+Remove a taint:
+`kubectl taint {NODE_NAME} {TAINT_NAME}`
 
 # Service Types
 
@@ -146,3 +182,62 @@ Apart from that, you must also specify the path to certificate files so that ETC
 So for the commands, I showed in the previous video to work you must specify the ETCDCTL API version and path to certificate files. Below is the final form:
 
 `kubectl exec etcd-controlplane -n kube-system -- sh -c "ETCDCTL_API=3 etcdctl get / --prefix --keys-only --limit=10 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt --key /etc/kubernetes/pki/etcd/server.key"`
+
+
+## Create files with commands
+Create an NGINX Pod
+
+`kubectl run nginx --image=nginx`
+
+Generate POD Manifest YAML file (-o yaml). Don’t create it(–dry-run)
+
+`kubectl run nginx --image=nginx --dry-run=client -o yaml`
+
+Create a deployment
+
+`kubectl create deployment --image=nginx nginx`
+
+Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run)
+
+`kubectl create deployment --image=nginx nginx --dry-run=client -o yaml`
+
+Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run) and save it to a file.
+
+`kubectl create deployment --image=nginx nginx --dry-run=client -o yaml > nginx-deployment.yaml`
+
+Make necessary changes to the file (for example, adding more replicas) and then create the deployment.
+
+`kubectl create -f nginx-deployment.yaml`
+
+## Impreitive Commands
+In the exam the expectation is that you will use Impreretive Commands, these are the commands that expalin exactly how to do something rather that delaratove which just explains the end state. 
+
+Some useful impreretive commands:
+
+Create an Pod:
+`kubectl run nginx --image=nginx`
+
+Create a deployment:
+`kubectl create deployment --image=nginx nginx`
+
+Generate Deployment with 4 Replicas:
+`kubectl create deployment nginx --image=nginx --replicas=4`
+
+You can also scale a deployment using the kubectl scale command.
+`kubectl scale deployment nginx --replicas=4`
+
+Another way to do this is to save the YAML definition to a file and modify:
+`kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml`
+
+Create a Service named redis-service of type ClusterIP to expose pod redis on port 6379:
+`kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o yaml`
+(This will automatically use the pod’s labels as selectors)
+
+Or
+
+`kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml`
+(This will not use the pods labels as selectors, instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work very well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
+
+Create a Service named nginx of type NodePort to expose pod nginx’s port 80 on port 30080 on the nodes:
+`kubectl expose pod nginx --type=NodePort --port=80 --name=nginx-service --dry-run=client -o yaml`
+

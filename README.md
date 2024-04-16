@@ -21,6 +21,9 @@ Namespaces provide a way to logically divide cluster resources into virtual clus
 Essentially, namespaces offer a scope for Kubernetes objects, such as pods, services, and replication controllers. They help in organizing and managing resources by providing isolation, resource quota, and access control within the cluster. 
 By default, Kubernetes resources are created in the 'default' namespace, but users can create additional namespaces to organize and isolate their workloads. This abstraction simplifies cluster management, enhances security, and supports multi-tenancy in Kubernetes environments.
 
+### Daemon Sets
+A DaemonSet in Kubernetes ensures that a copy of a specific pod runs on each node in the cluster. It's typically used for system-level tasks or agents that need to be present on every node, such as logging, monitoring, or network plugins. DaemonSets automatically schedule and maintain pods on each node, ensuring consistent deployment and management of essential services across the cluster.
+
 ## Commands
 ### Objects:
 - pods
@@ -110,6 +113,10 @@ Options for the taint effect are:
 
 Remove a taint:
 `kubectl taint {NODE_NAME} {TAINT_NAME}`
+
+## kubectl label
+To label Nodes:
+`kubectl label node {NODE_NAME} {KEY}={VALUE}`
 
 # Service Types
 
@@ -208,6 +215,10 @@ Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run) and save 
 Make necessary changes to the file (for example, adding more replicas) and then create the deployment.
 
 `kubectl create -f nginx-deployment.yaml`
+
+Create Daemon Set
+`kubectl create daemonset <daemonset-name> --image=<image-name> --namespace=<namespace>`
+
 
 ## Impreitive Commands
 In the exam the expectation is that you will use Impreretive Commands, these are the commands that expalin exactly how to do something rather that delaratove which just explains the end state. 

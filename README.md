@@ -30,6 +30,20 @@ A DaemonSet in Kubernetes ensures that a copy of a specific pod runs on each nod
 - deployments
 - replicaset
 
+### Shorthand versions:
+- Pod: po
+- Service: svc
+- ReplicaSet: rs
+- Deployment: deploy
+- StatefulSet: sts
+- DaemonSet: ds
+- Job: job
+- Namespace: ns
+- ConfigMap: cm
+- Secret: secret
+- PersistentVolume: pv
+- PersistentVolumeClaim: pvc
+
 ### kubectl run
 `kubectl run {NAME} --image={IMAGE}`
 
@@ -65,6 +79,15 @@ Get all objects: `kubectl get all`
 **Example** - `kubectl scale replicaset myapp-replicatset --replicas=2`
 
 ## kubectl rollout
+Rolling updates are the default deployment strategy for Kubernetes. This means one pod will go downa nd a new one comes up rather than all updated at onces.
+The alternitive is the "Recreate Strategy" this is when all the pods are brought down and replaced
+
+You can update the manifest and then run:
+`kubectl apply -f {MANIFEST_FILE}`
+or 
+`kubectl set image deplopyment/{deployment-name} \ {CONTAINER_NAME}={NEW_IMAGE}`
+This way will not update the file though so it will be out of date
+
 View Rollout Status:
 `kubectl rollout status deployment/{deployment-name}`
 
@@ -252,3 +275,66 @@ Or
 Create a Service named nginx of type NodePort to expose pod nginx’s port 80 on port 30080 on the nodes:
 `kubectl expose pod nginx --type=NodePort --port=80 --name=nginx-service --dry-run=client -o yaml`
 
+
+## Logging and Montioring
+
+### Metric Server
+Install metric server:
+It can be cloned from github: `git clone https://github.com/kodekloudhub/kubernetes-metrics-server.git`
+
+Once installed:
+View Node performance: `kubectl top node`
+View Pod performance: `kubectl top pod`
+
+### kubectl logs
+Inspect logs: `kubectl logs {POD_NAME}`
+If there are more than 1 container in the Pod then you need to specify the container you want the logs for.
+
+## Docker and Kubernetes
+
+There are certain arguments that can override the ones configured in the Dickerfile. 
+For example, in Docker you use ENTRYPOINT to run a program upon startup, and CMD to run a command. 
+These can both be overriden in the Pod manifest, example below:
+
+`apiVersion: v1`
+`kind: Pod`
+`metadata:`
+`  name: sleeper-pod`
+`spec:`
+`  containers:`
+`  - name: ununtu-sleeper`
+`    image: ununtu-sleeper`
+`    command: ["sleep2.0"]` --- This is what overrides the Dockerfile ENTRYPOINT
+`    args: ["10"]` --- This is what overrides the Dockerfile CMD
+
+## Config Maps
+You can create config maps in both the Imperative and declarative ways. 
+
+Imperative (Using commands, no manifest file):
+`kubectl create configmap {CONFIG_NAME} --from-literal={KEY}={VALUE}`
+or 
+`kubectl create configmap {CONFIG_NAME} --from-file={FILEPATH}`
+
+Declarative (Using a file):
+`kubectl create -f {PATH_TO_CONFIG_FILE}`
+
+## Secrets
+You can create Secrets both the Imperative and declarative ways. 
+Imperative (Using commands, no manifest file):
+`kubectl create secret generic {SECRET_NAME} --from-literal={KEY}={VALUE}`
+example: `kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123`
+or 
+`kubectl create secret generic {SECRET_NAME} --from-file={FILEPATH}`
+
+Declarative (Using a file):
+`kubectl create -f {PATH_TO_CONFIG_FILE}`
+
+To encode secrets (linux OS) run: 
+`echo -n "{VALUE}" | base64`
+
+## Init Containers
+In a multi-container pod, each container is expected to run a process that stays alive as long as the POD’s lifecycle. 
+But at times you may want to run a process that runs to completion in a container, that’s where initContainers comes in.
+An initContainer is configured in a pod like all other containers, except that it is specified inside a initContainers section
+When a POD is first created the initContainer is run, and the process in the initContainer must run to a completion before the real container hosting the application starts.
+You can configure multiple such initContainers as well, like how we did for multi-containers pod. In that case, each init container is run one at a time in sequential order.

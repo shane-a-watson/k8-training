@@ -296,16 +296,18 @@ There are certain arguments that can override the ones configured in the Dickerf
 For example, in Docker you use ENTRYPOINT to run a program upon startup, and CMD to run a command. 
 These can both be overriden in the Pod manifest, example below:
 
-`apiVersion: v1`
-`kind: Pod`
-`metadata:`
-`  name: sleeper-pod`
-`spec:`
-`  containers:`
-`  - name: ununtu-sleeper`
-`    image: ununtu-sleeper`
-`    command: ["sleep2.0"]` --- This is what overrides the Dockerfile ENTRYPOINT
-`    args: ["10"]` --- This is what overrides the Dockerfile CMD
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sleeper-pod
+spec:
+  containers:
+  - name: ununtu-sleeper
+    image: ununtu-sleeper
+    command: ["sleep2.0"] --- This is what overrides the Dockerfile ENTRYPOINT
+    args: ["10"] --- This is what overrides the Dockerfile CMD
+```
 
 ## Config Maps
 You can create config maps in both the Imperative and declarative ways. 

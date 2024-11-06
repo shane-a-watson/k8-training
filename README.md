@@ -1,5 +1,10 @@
 # K8 Notes
 
+## AKS
+az login
+az account set --subscription {SUB_NAME}
+If using an AKS, log in with: az aks get-credentials --resource-group {RESOURCE_GROUP_NAME} --name {CLUSTER_NAME}
+
 ## Objects
 ### Pods
 Pods are the smallest deployable units in Kubernetes.
@@ -175,6 +180,8 @@ Kube-proxy is a network proxy running on each node that maintains network rules 
 ### API Server:
 The Kubernetes API Server acts as the front-end to the Kubernetes control plane. It exposes the Kubernetes API, which allows users and other components to interact with the cluster. API Server validates and processes requests, updating the cluster state stored in etcd, a distributed key-value store. It serves as the primary interface for cluster management, receiving commands from kubectl and other Kubernetes components.
 
+The API Server will have a config file, located at: `/etc/kubernetes/manifests/kube-apiserver.yaml`
+
 # ETCD 
 
 ### Overview
@@ -340,3 +347,82 @@ But at times you may want to run a process that runs to completion in a containe
 An initContainer is configured in a pod like all other containers, except that it is specified inside a initContainers section
 When a POD is first created the initContainer is run, and the process in the initContainer must run to a completion before the real container hosting the application starts.
 You can configure multiple such initContainers as well, like how we did for multi-containers pod. In that case, each init container is run one at a time in sequential order.
+
+## Drain, Cordon and Uncordon
+If a node goes down or has planned maintanance there is a way to remove all pods from it and move them to another node.
+`kubectl drain {NODE_NAME}`
+
+Once its drained it can be rebooted. When it comes back up it will still be unscehuleable. 
+To allow pods to be placed back on it it needs to be uncordoned:
+`kubectl uncorden {NODE_NAME}`
+
+You can also cordon a node which means that no pods will be placed onto it:
+`kubectl cordon {NODE_NAME}`
+
+## Backups
+### Resources
+You can back up the entire Kubernetes deployed estate with: `kubectl get all --all-namspaces -o yaml > all-deployed-services.yaml`
+
+Some tools will do this for you, eg. Velero will take backups of your estate.
+
+### ETCD Backup
+To make use of etcdctl for tasks such as back up and restore, make sure that you set the ETCDCTL_API to 3. 
+This can be done as follows:
+`export ETCDCTL_API=3`
+
+When configuring etcd you specify the location the etcd files should be stored, this is what should be backed up.
+
+You can create a snapshot of the etcd by using the etcd control utility: `ETCDCTL_API=3 etcdctl snapshot save {SNAPSHOT_NAME}.db`
+View the status of the back up with: `ETCDCTL_API=3 etcdctl snapshot status {SNAPSHOT_NAME}.db`
+
+To restore the backup:
+1. Stop the kube api service: `service kube-apiserver stop`
+2. Run the restore command (this created a new data directory): `ETCDCTL_API=3 etcdctl snapshot restore {SNAPSHOT_NAME}.db --data-dir {NEW_DATA_DIR_PATH}`
+3. Reconfigure the etcd data file to use the new data directory.
+4. Reload the service daemon: `systemctl daemon-reload`
+5. Restart the etcd service: `service etcd restart`
+6. Start the kube api server service: `Service kube-apiserver start`
+
+* Note - You may have to authenticate to run the etcd commands, eg. 
+```
+ETCDCTL_API=3 etcdctl \
+    snapshot save {SNAPSHOT_NAME}.db \
+    --endpoints=https://127.0.0.1:2379 \ 
+    --cacert=/etc/etcd/ca.crt
+    --cert=/etc/etcd/etcd-server.crt
+    --key=/etc/etcd/etcd-server.key
+```
+
+Since our ETCD database is TLS-Enabled, the following options are mandatory:
+
+– cacert: verify certificates of TLS-enabled secure servers using this CA bundle
+– cert: identify secure client using this TLS certificate file
+– endpoints=[127.0.0.1:2379]: This is the default as ETCD is running on master node and exposed on localhost 2379.
+– key: identify secure client using this TLS key file
+
+## KubeConfig
+View the current KubeConfig: `kubectl config view`
+
+Update current context: `kubeclt config user-context {USERNAME}@{CLUSTER}`
+
+For more info: `kubectl config -h`
+
+### Switching context:
+To switch contect: `kubectl config --kubeconfig={FILEPATH_TO_KUBECONFIG} use-context {CONTEXT_NAME}`
+
+## Permission check
+Check if you can do somthing by running: `kubectl auth can-i {ACTION} {OBJECT}`
+example: `kubectl auth can-i create deployments`
+
+Check other users permissions: `kubectl auth can-i {ACTION} {OBJECT} --as {USER}`
+
+## kubectl roles
+You can get / describe / delete roles by running: `kubectl {ACTION} role`
+Additionally you can find out more info on by checking the rolebinding `kubectl {ACTION} rolebinding`
+
+Create a role:
+`kubectl create role {ROLE_NAME} --namespace={NAMESPACE} --verb={ACTION},{ACTION} --resource={OBJECTS} --dry-run=client -o yaml > {FILENAME}.yaml`
+
+Create a role Binding:
+`kubectl create rolebinding {BINDING_NAME} --namespace={NAMESPACE} --role={ROLE_NAME} --user={USER_NAME} --dry-run=client -o yaml > {FILENAME}.yaml`
+
